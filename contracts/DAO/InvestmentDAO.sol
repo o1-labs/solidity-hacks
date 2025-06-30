@@ -19,7 +19,8 @@ contract InvestmentDAO {
         require(amount > 0, "Withdrawal amount must be greater than 0");
         require(investments[msg.sender] >= amount, "Insufficient investment balance");
         
-        payable(msg.sender).transfer(amount);
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        require(success, "Transfer failed");
         
         investments[msg.sender] -= amount;
         totalInvestments -= amount;
