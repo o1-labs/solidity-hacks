@@ -6,6 +6,7 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
+    "coverage": "hardhat coverage",
     "node": "hardhat node",
     "deploy": "hardhat run scripts/deploy.ts",
     "lint": "eslint . --ext .ts",
@@ -35,6 +36,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "hardhat": "^2.19.0",
     "prettier": "^3.0.0",
+    "solidity-coverage": "^0.8.5",
     "ts-node": "^10.0.0",
     "typescript": "^5.0.0"
   },
