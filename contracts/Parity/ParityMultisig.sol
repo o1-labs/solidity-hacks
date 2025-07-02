@@ -116,22 +116,15 @@ contract WalletLibrary {
     }
     
     function isConfirmed(uint256 transactionId) public view returns (bool) {
-        uint256 count = 0;
-        for (uint256 i = 0; i < m_numOwners; i++) {
-            // This is simplified - real implementation would iterate through owners array
-            // For demo purposes, we'll check confirmations differently
-        }
-        
         // Simplified confirmation check
         uint256 confirmationCount = getConfirmationCount(transactionId);
         return confirmationCount >= m_required;
     }
     
-    function getConfirmationCount(uint256 transactionId) internal view returns (uint256) {
-        uint256 count = 0;
+    function getConfirmationCount(uint256 /* transactionId */) internal pure returns (uint256) {
         // This would normally iterate through all owners
-        // Simplified for demo
-        return count;
+        // Simplified for demo - always return 0
+        return 0;
     }
     
     // Fallback to accept ETH
@@ -140,4 +133,33 @@ contract WalletLibrary {
             emit Deposit(msg.sender, msg.value);
         }
     }
+}
+
+contract MultisigWallet {
+    address public walletLibrary;
+    
+    constructor(address _library, address[] memory _owners, uint256 _required) {
+        walletLibrary = _library;
+        
+        // Initialize the wallet by delegating to the library
+        (bool success,) = _library.delegatecall(
+            abi.encodeWithSignature("initWallet(address[],uint256)", _owners, _required)
+        );
+        require(success, "Initialization failed");
+    }
+    
+    fallback() external payable {
+        address target = walletLibrary;
+        assembly {
+            calldatacopy(0, 0, calldatasize())
+            let result := delegatecall(gas(), target, 0, calldatasize(), 0, 0)
+            returndatacopy(0, 0, returndatasize())
+            
+            switch result
+            case 0 { revert(0, returndatasize()) }
+            default { return(0, returndatasize()) }
+        }
+    }
+    
+    receive() external payable {}
 }
